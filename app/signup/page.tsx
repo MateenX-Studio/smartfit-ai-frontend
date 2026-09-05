@@ -25,10 +25,16 @@ export default function Signup() {
             });
 
             const data = await response.json();
-
             if (response.ok) {
-                setMessage("Account created. You can now log in.");
+                if (data.access_token) {
+                    localStorage.setItem("access_token", data.access_token);
+                    localStorage.setItem("refresh_token", data.refresh_token);
+                    router.push("/dashboard");
+                } else {
+                    setMessage("Account created. You can now log in.");
+                }
             } else {
+
                 setMessage(data.detail || "Something went wrong.");
             }
         } catch (err) {
