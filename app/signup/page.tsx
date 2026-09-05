@@ -31,8 +31,11 @@ export default function Signup() {
                     localStorage.setItem("refresh_token", data.refresh_token);
                     router.push("/dashboard");
                 } else {
-                    setMessage("Account created. You can now log in.");
+                  
+
+                    setMessage("Account created! Please check your email to confirm your account before logging in.");
                 }
+                
             } else {
 
                 setMessage(data.detail || "Something went wrong.");
