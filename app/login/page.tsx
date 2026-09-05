@@ -2,11 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -17,28 +12,24 @@ export default function Login() {
     const router = useRouter();
 
     useEffect(() => {
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                localStorage.setItem("access_token", session.access_token);
-                localStorage.setItem("refresh_token", session.refresh_token);
-                router.push("/dashboard");
+        const handleEmailRedirect = () => {
+            const hash = window.location.hash;
+            if (hash && hash.includes("access_token")) {
+                const params = new URLSearchParams(hash.replace("#", "?"));
+                const accessToken = params.get("access_token");
+                const refreshToken = params.get("refresh_token");
+
+                if (accessToken) {
+                    localStorage.setItem("access_token", accessToken);
+                    if (refreshToken) {
+                        localStorage.setItem("refresh_token", refreshToken);
+                    }
+                    router.push("/dashboard");
+                }
             }
         };
 
-        checkSession();
-
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                localStorage.setItem("access_token", session.access_token);
-                localStorage.setItem("refresh_token", session.refresh_token);
-                router.push("/dashboard");
-            }
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
+        handleEmailRedirect();
     }, [router]);
 
     const handleLogin = async () => {
